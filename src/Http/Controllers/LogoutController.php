@@ -2,7 +2,7 @@
 
 namespace CodeGreenCreative\SamlIdp\Http\Controllers;
 
-use CodeGreenCreative\SamlIdp\Traits\PerformsSingleSignOn;
+use CodeGreenCreative\SamlIdp\SamlServiceProviderConfig;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -10,7 +10,6 @@ use CodeGreenCreative\SamlIdp\Jobs\SamlSlo;
 
 class LogoutController extends Controller
 {
-    use PerformsSingleSignOn;
 
     /**
      * [index description]
@@ -28,9 +27,12 @@ class LogoutController extends Controller
             $request->session()->put('saml.slo', []);
         }
 
+        // Create config instance directly
+        $spConfig = new SamlServiceProviderConfig();
+
         // Need to broadcast to our other SAML apps to log out!
         // Loop through our service providers and "touch" the logout URL's
-        foreach ($this->getAllServiceProviders() as $spId => $sp) {
+        foreach ($spConfig->allWithKeys() as $spId => $sp) {
             // Check if the service provider supports SLO
             if (!empty($sp['logout']) && !in_array($spId, $request->session()->get('saml.slo', []))) {
                 // Push this SP onto the saml slo array

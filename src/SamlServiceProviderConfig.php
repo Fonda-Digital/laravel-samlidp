@@ -137,7 +137,6 @@ class SamlServiceProviderConfig
 
     /**
      * Get all service providers with their IDs as keys.
-     * Returns normalized array structure regardless of source.
      *
      * @return array Associative array of SP ID => SP data
      */
