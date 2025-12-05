@@ -9,4 +9,9 @@ class SamlServiceProvider extends Model
     protected $table = 'laravel_samlidp_service_providers';
     public $incrementing = false;
     protected $keyType = 'string';
+
+    protected $casts = [
+        'query_params' => 'array',
+        'encrypt_assertion' => 'boolean',
+    ];
 }

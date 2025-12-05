@@ -42,6 +42,12 @@ return [
     // Auth Context to send with the assertion
     'authn_context' => SamlConstants::NAME_ID_FORMAT_UNSPECIFIED,
     // list of all service providers
+
+    /*
+     * Optional, the classname of the model to be used to store service providers.
+     */
+    'sp_model' => \CodeGreenCreative\SamlIdp\Models\SamlServiceProvider::class,
+
     'sp' => [
         // Base64 encoded ACS URL
         // 'aHR0cHM6Ly9teWZhY2Vib29rd29ya3BsYWNlLmZhY2Vib29rLmNvbS93b3JrL3NhbWwucGhw' => [

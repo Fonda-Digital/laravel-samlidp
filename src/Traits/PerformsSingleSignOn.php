@@ -3,6 +3,7 @@
 namespace CodeGreenCreative\SamlIdp\Traits;
 
 use CodeGreenCreative\SamlIdp\Models\SamlServiceProvider;
+use CodeGreenCreative\SamlIdp\SamlServiceProviderConfig;
 use Illuminate\Support\Facades\Storage;
 use LightSaml\Binding\BindingFactory;
 use LightSaml\Context\Profile\MessageContext;
@@ -19,6 +20,7 @@ trait PerformsSingleSignOn
     private $request;
     private $response;
     private $digest_algorithm;
+    private SamlServiceProviderConfig $samlServiceProviderConfig;
 
     /**
      * [__construct description]
@@ -29,6 +31,7 @@ trait PerformsSingleSignOn
         $this->certificate = $this->getCertificate();
         $this->private_key = $this->getKey();
         $this->digest_algorithm = config('samlidp.digest_algorithm', XMLSecurityDSig::SHA1);
+        $this->samlServiceProviderConfig = new SamlServiceProviderConfig();
     }
 
     /**
@@ -88,21 +91,12 @@ trait PerformsSingleSignOn
 
     protected function getServiceProviderConfigValue($request, string $configKey): mixed
     {
-        if (config('samlidp.sp') === SamlServiceProvider::class) {
-            $serviceProvider = SamlServiceProvider::findOrFail($this->getServiceProvider($request));
-
-            return $serviceProvider->$configKey;
-        }
-
-        return config(sprintf('samlidp.sp.%s.%s', $this->getServiceProvider($request), $configKey));
+        $spId = $this->getServiceProvider($request);
+        return $this->samlServiceProviderConfig->getValue($spId, $configKey);
     }
 
     public function getAllServiceProviders(): array
     {
-        if (config('samlidp.sp') === SamlServiceProvider::class) {
-            return SamlServiceProvider::all()->toArray();
-        }
-
-        return config('samlidp.sp');
+        return $this->samlServiceProviderConfig->allWithKeys();
     }
 }

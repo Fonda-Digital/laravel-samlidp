@@ -3,8 +3,6 @@
 namespace CodeGreenCreative\SamlIdp\Jobs;
 
 use LightSaml\Helper;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use LightSaml\SamlConstants;
 use LightSaml\Model\Protocol\Status;
 use LightSaml\Model\Assertion\Issuer;
@@ -22,20 +20,20 @@ class SamlSlo
     use Dispatchable;
     use PerformsSingleSignOn;
 
-    private $sp;
+    private $spId;
 
     private $destination;
 
     private $logout_request;
 
     /**
-     * [__construct description]
+     * Create a new SamlSlo instance.
      *
-     * @param [type] $sp [description]
+     * @param string $spId The base64 encoded ACS URL identifying the service provider
      */
-    public function __construct($sp)
+    public function __construct(string $spId)
     {
-        $this->sp = $sp;
+        $this->spId = $spId;
         $this->init();
     }
 
@@ -114,29 +112,14 @@ class SamlSlo
 
     private function setDestination()
     {
-        $destination = $this->sp['logout'];
-        $queryParams = $this->getQueryParams();
-        if (!empty($queryParams)) {
-            if (!parse_url($destination, PHP_URL_QUERY)) {
-                $destination = Str::finish(url($destination), '?') . Arr::query($queryParams);
-            } else {
-                $destination .= '&' . Arr::query($queryParams);
-            }
+        $destination = $this->samlServiceProviderConfig->getLogoutUrl($this->spId);
+
+        if (empty($destination)) {
+            throw new \RuntimeException(
+                "Service provider {$this->spId} does not have a logout URL configured."
+            );
         }
 
         $this->destination = $destination;
-    }
-
-    private function getQueryParams()
-    {
-        $queryParams = isset($this->sp['query_params']) ? $this->sp['query_params'] : null;
-
-        if (is_null($queryParams)) {
-            $queryParams = [
-                'idp' => config('app.url'),
-            ];
-        }
-
-        return $queryParams;
     }
 }

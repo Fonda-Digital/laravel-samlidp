@@ -30,12 +30,12 @@ class LogoutController extends Controller
 
         // Need to broadcast to our other SAML apps to log out!
         // Loop through our service providers and "touch" the logout URL's
-        foreach ($this->getAllServiceProviders() as $key => $sp) {
+        foreach ($this->getAllServiceProviders() as $spId => $sp) {
             // Check if the service provider supports SLO
-            if (!empty($sp['logout']) && !in_array($key, $request->session()->get('saml.slo', []))) {
+            if (!empty($sp['logout']) && !in_array($spId, $request->session()->get('saml.slo', []))) {
                 // Push this SP onto the saml slo array
-                $request->session()->push('saml.slo', $key);
-                return redirect(SamlSlo::dispatchSync($sp));
+                $request->session()->push('saml.slo', $spId);
+                return redirect(SamlSlo::dispatchSync($spId));
             }
         }
 

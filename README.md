@@ -128,7 +128,7 @@ as the config file.
 
 return [
     // ...
-    'sp' => \CodeGreenCreative\SamlIdp\Models\SamlServiceProvider::class,
+    'sp_model' => \CodeGreenCreative\SamlIdp\Models\SamlServiceProvider::class,
     // ...
 ];
 ```
